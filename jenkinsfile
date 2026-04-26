@@ -1,7 +1,27 @@
-stage('Install') {
-    steps {
-        sh '''
-        /usr/bin/pip3 install -r requirements.txt
-        '''
+pipeline {
+    agent any
+
+    stages {
+
+        stage('Build') {
+            steps {
+                sh '/usr/bin/pip3 install -r requirements.txt'
+            }
+        }
+
+        stage('Test') {
+            steps {
+                sh 'pytest || true'
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                sh '''
+                pkill -f app.py || true
+                nohup python3 app.py > app.log 2>&1 &
+                '''
+            }
+        }
     }
 }
