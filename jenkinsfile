@@ -16,11 +16,12 @@ pipeline {
         stage('Test') {
             steps {
                 sh '''
+                export MONGO_URI="mongodb://localhost:27017/testdb"
                 . venv/bin/activate
                 pytest || true
                 '''
-            }
-        }
+    }
+}
 
         stage('Deploy') {
             steps {
