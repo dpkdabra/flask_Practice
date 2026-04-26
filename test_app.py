@@ -1,5 +1,5 @@
 import pytest
-from app import app
+from app import app, mongo
 from bson.objectid import ObjectId
 
 @pytest.fixture

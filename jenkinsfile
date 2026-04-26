@@ -1,35 +1,55 @@
 pipeline {
     agent any
 
+    environment {
+        MONGO_URI = "mongodb://localhost:27017/test_student_db"
+    }
+
     stages {
 
-        stage('Build') {
+        stage('Checkout Code') {
+            steps {
+                git 'https://github.com/dpkdabra/flask_Practice.git'
+            }
+        }
+
+        stage('Setup Virtual Environment') {
             steps {
                 sh '''
                 python3 -m venv venv
                 . venv/bin/activate
+                pip install --upgrade pip
                 pip install -r requirements.txt
                 '''
             }
         }
 
-        stage('Test') {
+        stage('Run Tests') {
             steps {
                 sh '''
-                export MONGO_URI="mongodb://localhost:27017/testdb"
                 . venv/bin/activate
-                pytest || true
+                export MONGO_URI=$MONGO_URI
+                pytest -v
                 '''
-    }
-}
+            }
+        }
 
-        stage('Deploy') {
+        stage('Deploy Application') {
             steps {
                 sh '''
                 pkill -f app.py || true
                 nohup venv/bin/python app.py > app.log 2>&1 &
                 '''
             }
+        }
+    }
+
+    post {
+        success {
+            echo "Pipeline executed successfully"
+        }
+        failure {
+            echo "Pipeline failed — check tests or logs"
         }
     }
 }
